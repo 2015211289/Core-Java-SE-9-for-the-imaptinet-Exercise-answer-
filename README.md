@@ -4,6 +4,13 @@
 这是该书每个章节的课后练习答案，由本人编写。由于本人能力有限，无法保证答案的正确和完整性，仅供许学习和参考。  
 如果有任何建议，请发起Issues。  
 源码放在java路径下，sec表示章节，exercise表示题目。  
+This is an after-lab exercise answer for each chapter of the book, written by
+ myself.  
+Due to my limited ability, I cannot guarantee the correctness and 
+completeness of the answer, and it is for study and reference only.  
+If you have any suggestions, please launch Issues.  
+The source code is placed in the java path, sec represents the chapter, and exercise represents the 
+exercise.  
 
 ![picture](pic.jpg)  
 
