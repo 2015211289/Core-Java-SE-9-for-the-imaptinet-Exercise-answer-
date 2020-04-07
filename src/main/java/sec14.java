@@ -5,13 +5,8 @@ import javax.tools.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -20,23 +15,23 @@ import java.util.regex.Pattern;
 public class sec14 {
 
     //exercise1
-    static String exercise1(String content) throws IOException{
-        String[] lines=content.split("\n");
+    static String exercise1(String content) throws IOException {
+        String[] lines = content.split("\n");
         Pattern pattern = Pattern.compile("<%(.*?)%>");
         StringBuilder sb = new StringBuilder();
         sb.append("public class Jsp {\n");
         sb.append("\tpublic static String run() {\n");
         sb.append("\tString result = new String();\n");
-        for(String line:lines){
+        for (String line : lines) {
             Matcher matcher = pattern.matcher(line);
-            if(matcher.find()){
-                String match=matcher.group(1);
-                int s=matcher.start();
-                int e=matcher.end();
+            if (matcher.find()) {
+                String match = matcher.group(1);
+                int s = matcher.start();
+                int e = matcher.end();
                 if (match.startsWith("=")) {
                     sb.append("result+=");
                     sb.append("\"");
-                    sb.append(line.substring(0,s));
+                    sb.append(line.substring(0, s));
                     sb.append("\"+");
                     sb.append(match.substring(1));
                     sb.append("+\"");
@@ -46,7 +41,7 @@ public class sec14 {
                     sb.append(match);
                     sb.append("\n");
                 }
-            }else {
+            } else {
                 sb.append("result+=\"");
                 sb.append(line);
                 sb.append("\"+\"\\n\";\n");
@@ -86,13 +81,13 @@ public class sec14 {
         }
         System.out.println(result);
         ByteArrayClassLoader loader = new ByteArrayClassLoader(classes);
-        try{
+        try {
             Class<?> cl = Class.forName("Jsp", true, loader);
-            Method m=cl.getDeclaredMethod("run");
-            Object o=m.invoke(null);
+            Method m = cl.getDeclaredMethod("run");
+            Object o = m.invoke(null);
             return (String) o;
 
-        } catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
             return null;
         }
@@ -152,55 +147,56 @@ public class sec14 {
     }
 
     //exercise2
-    static String exercise2a(String json) throws Exception{
+    static String exercise2a(String json) throws Exception {
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine engine = manager.getEngineByName("nashorn");
-        engine.put("str",json);
+        engine.put("str", json);
         engine.eval("var obj=JSON.parse(str)");
-        Object result=engine.eval("JSON.stringify(obj)");
+        Object result = engine.eval("JSON.stringify(obj)");
         return (String) result;
     }
 
-    static String exercise2b(String json) throws Exception{
+    static String exercise2b(String json) throws Exception {
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine engine = manager.getEngineByName("nashorn");
-        Object j=engine.eval("JSON");
-        Object result= ((Invocable) engine).invokeMethod(j,"parse",
+        Object j = engine.eval("JSON");
+        Object result = ((Invocable) engine).invokeMethod(j, "parse",
                 json);
-        result= ((Invocable) engine).invokeMethod(j,"stringify",
+        result = ((Invocable) engine).invokeMethod(j, "stringify",
                 result);
         return (String) result;
     }
 
-    public interface JSON{
+    public interface JSON {
         Object parse(String str);
+
         String stringify(Object obj);
     }
 
-    static String exercise2c(String json)throws Exception{
+    static String exercise2c(String json) throws Exception {
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine engine = manager.getEngineByName("nashorn");
-        Object j=engine.eval("JSON");
-        JSON js=((Invocable) engine).getInterface(j,JSON.class);
-        Object o=js.parse(json);
+        Object j = engine.eval("JSON");
+        JSON js = ((Invocable) engine).getInterface(j, JSON.class);
+        Object o = js.parse(json);
         return js.stringify(o);
     }
 
     //exercise3
-    static void exercise3a() throws ScriptException{
+    static void exercise3a() throws ScriptException {
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine engine = manager.getEngineByName("nashorn");
-        String js="function f(n) { return n<=1?1:n*f(n-1)}\nf(30)";
-        if(engine instanceof Compilable){
+        String js = "function f(n) { return n<=1?1:n*f(n-1)}\nf(30)";
+        if (engine instanceof Compilable) {
             CompiledScript script = ((Compilable) engine).compile(js);
             script.eval();
         }
     }
 
-    static void exercise3b() throws ScriptException{
+    static void exercise3b() throws ScriptException {
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine engine = manager.getEngineByName("nashorn");
-        String js="function f(n) { return n<=1?1:n*f(n-1)}\nf(30)";
+        String js = "function f(n) { return n<=1?1:n*f(n-1)}\nf(30)";
         engine.eval(js);
     }
 
@@ -209,8 +205,41 @@ public class sec14 {
      */
 
     //exercise4
-    static void exercise4(){
-        
+    static void exercise4() {
+        JScheme js = new JScheme();
+        String s = "(define factorial (lambda (n) (do ((i n (- i 1)) (a 1 (* a i)))" +
+                "((zero? i) a))))";
+        js.eval(s);
+        System.out.println(js.call("factorial", 10));
     }
+    /*
+    采用Jscheme-7.2.jar实现在java中调用Scheme的脚本。
+     */
 
+    //exercise5
+    /*
+    使用jjs调试会更方便。
+     */
+
+    //exercise6
+    /*
+    在Stream操作中，所有结果都是延迟计算的，所以交互操作并没有返回结果，直到归约操作的执行。
+     */
+
+    //exercise7
+    /*
+    b显示为1234567890987654321，求mod后显示为1，正确。可能作者当时的版本导致了差别。
+     */
+
+    //exercise8
+    /*
+    function Factory(){
+        var newArray = new (Java.extend(java.util.ArrayList)) {
+            add: function(x) {
+                print('Adding '+x)
+                return Java.super(newArray).add(x)
+            }
+        }
+        return newArray
+     */
 }
